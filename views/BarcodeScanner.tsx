@@ -1,22 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Text, View, StyleSheet, Button } from 'react-native';
-import {
-  BarCodeEvent,
-  BarCodeScanner,
-  PermissionStatus,
-} from 'expo-barcode-scanner';
+import { BarCodeEvent, BarCodeScanner } from 'expo-barcode-scanner';
+import { usePermission } from '../hooks/usePermission';
 
-export default function App() {
-  const [hasPermission, setHasPermission] = useState<boolean | null>(null);
+export default function BarcodeScanner() {
+  const hasPermission = usePermission('barcode-scanner');
   const [scanned, setScanned] = useState(false);
   const [result, setResult] = useState('');
-
-  useEffect(() => {
-    (async () => {
-      const { status } = await BarCodeScanner.requestPermissionsAsync();
-      setHasPermission(status === PermissionStatus.GRANTED);
-    })();
-  }, []);
 
   const handleBarCodeScanned = ({ type, data }: BarCodeEvent) => {
     setScanned(true);

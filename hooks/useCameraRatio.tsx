@@ -55,8 +55,6 @@ export function useCameraRatio() {
       // Set a flag so we don't do this
       // calculation each time the screen refreshes
       setIsRatioSet(true);
-
-      console.log({ remainder, desiredRatio, realRatios, minDistance });
     }
   };
 

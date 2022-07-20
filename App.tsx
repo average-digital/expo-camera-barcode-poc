@@ -1,7 +1,16 @@
-import Camera from './views/Camera';
-import BarcodeScanner from './views/BarcodeScanner';
+import { Provider as PaperProvider } from 'react-native-paper';
+import { NavigationContainer } from '@react-navigation/native';
+import { StackNavigator } from './navigation/StackNavigator';
+import { CameraProvider } from './providers/CameraProvider';
 
 export default function App() {
-  // return <BarcodeScanner />;
-  return <Camera />;
+  return (
+    <NavigationContainer>
+      <PaperProvider>
+        <CameraProvider>
+          <StackNavigator />
+        </CameraProvider>
+      </PaperProvider>
+    </NavigationContainer>
+  );
 }

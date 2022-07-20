@@ -1,12 +1,17 @@
-import React, { useRef, useState } from 'react';
-import { StyleSheet, View, Text, Image, TouchableOpacity } from 'react-native';
+import React, { useRef } from 'react';
+import { View, Text } from 'react-native';
 import { Camera } from 'expo-camera';
 import { useCameraRatio } from '../hooks/useCameraRatio';
-import { useCameraPermission } from '../hooks/usePermission';
+import { usePermission } from '../hooks/usePermission';
+import { useCamera } from '../providers/CameraProvider';
+import { CameraProps } from '../navigation';
+import { Button, IconButton } from 'react-native-paper';
+import { useIsFocused } from '@react-navigation/native';
 
-export default function App() {
-  const [image, setImage] = useState<string | undefined>();
-  const hasPermission = useCameraPermission();
+export default function CameraView({ navigation }: CameraProps) {
+  const isFocused = useIsFocused();
+  const hasPermission = usePermission('camera');
+  const { setImage } = useCamera();
   const { prepareRatio, imagePadding, ratio } = useCameraRatio();
 
   const camera = useRef<Camera>(null);
@@ -17,74 +22,51 @@ export default function App() {
     });
 
     if (!result?.base64) return alert('Error taking photo');
-    setImage(`data:image/png;base64,${result.base64}`);
-    console.log(result);
+    setImage(result);
+    navigation.pop();
   }
 
   if (hasPermission === null) {
     return (
-      <View style={styles.information}>
+      <View>
         <Text>Waiting for camera permissions</Text>
       </View>
     );
   } else if (hasPermission === false) {
     return (
-      <View style={styles.information}>
+      <View>
         <Text>No access to camera</Text>
       </View>
     );
-  } else {
-    return image ? (
-      <View style={{ ...styles.container, backgroundColor: 'red' }}>
-        <Image
-          height={200}
-          width={200}
-          style={{ backgroundColor: 'red' }}
-          source={{ uri: image }}
-        />
-      </View>
-    ) : (
-      <View style={styles.container}>
+  } else if (isFocused) {
+    return (
+      <View style={{ flex: 1 }}>
         <Camera
-          style={[
-            styles.cameraPreview,
-            { marginTop: imagePadding, marginBottom: imagePadding },
-          ]}
+          style={{
+            flex: 1,
+            paddingTop: imagePadding,
+            paddingBottom: imagePadding,
+          }}
           onCameraReady={async () => await prepareRatio(camera?.current)}
           ratio={ratio}
           ref={camera}
         >
-          <TouchableOpacity
-            onPress={takePhoto}
+          <View
             style={{
-              backgroundColor: 'red',
-              height: 64,
               position: 'absolute',
-              bottom: 0,
-              left: 0,
-              right: 0,
+              alignItems: 'center',
+              bottom: 20,
+              left: 20,
+              right: 20,
             }}
           >
-            <Text>Take a photo</Text>
-          </TouchableOpacity>
+            <IconButton icon="camera" color="#fff" onPress={takePhoto}>
+              Take photo
+            </IconButton>
+          </View>
         </Camera>
       </View>
     );
   }
+  return <></>;
 }
-
-const styles = StyleSheet.create({
-  information: {
-    flex: 1,
-    justifyContent: 'center',
-    alignContent: 'center',
-    alignItems: 'center',
-  },
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-  },
-  cameraPreview: {
-    flex: 1,
-  },
-});
